@@ -4,11 +4,11 @@ let Traveler = require('./Traveler');
 let roleHarvester = require('./role.harvester');
 let roleUpgrader = require('./role.upgrader');
 let roleBuilder = require('./role.builder');
-let Mayor = require('./town/Mayor');
+let Mayor = require('./town_Mayor');
 
 module.exports.loop = function() {
-    const mayor = new Mayor(this.room.name);
-    mayor.Init();
+    const mayor = new Mayor('test');
+    console.log(mayor.roomName);
 
     //Memory management
     for(let name in Memory.creeps) {
