@@ -1,5 +1,5 @@
 let _ = require('lodash');
-let Traveler = require('./Traveler.js');
+let Traveler = require('./Traveler');
 
 let roleHarvester = require('./role.harvester');
 let roleUpgrader = require('./role.upgrader');
