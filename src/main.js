@@ -1,10 +1,15 @@
 let _ = require('lodash');
+let Traveler = require('./Traveler.js');
 
 let roleHarvester = require('./role.harvester');
 let roleUpgrader = require('./role.upgrader');
 let roleBuilder = require('./role.builder');
+let Mayor = require('./town/Mayor');
 
 module.exports.loop = function() {
+    const mayor = new Mayor(this.room.name);
+    mayor.Init();
+
     //Memory management
     for(let name in Memory.creeps) {
         if(!Game.creeps[name]) {

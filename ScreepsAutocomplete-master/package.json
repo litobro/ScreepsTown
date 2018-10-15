@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "IDE Autocomplete for Screeps",
   "dependencies": {
+    "lodash": "^4.17.11"
   },
   "devDependencies": {},
   "scripts": {
