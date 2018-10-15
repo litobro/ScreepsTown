@@ -1,3 +1,5 @@
+let _ = require('lodash');
+
 let roleHarvester = require('./role.harvester');
 let roleUpgrader = require('./role.upgrader');
 let roleBuilder = require('./role.builder');
@@ -11,7 +13,7 @@ module.exports.loop = function() {
         }
     }
     
-    let harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester');
+    let harvesters = _.filter(Game.creeps, (creep) => creep.memory.role === 'harvester');
     console.log('Harvester Count:', harvesters.length);
     if(harvesters.length < 2) {
         let newName = 'Harvester' + Game.time;
@@ -19,7 +21,7 @@ module.exports.loop = function() {
         Game.spawns['Spawn1'].spawnCreep([WORK, CARRY, MOVE], newName, { memory: { role: 'harvester'}});
     }
     
-    let upgraders = _.filter(Game.creeps, (creep) => creep.memory.role == 'upgrader');
+    let upgraders = _.filter(Game.creeps, (creep) => creep.memory.role === 'upgrader');
     console.log('Upgrader Count:', upgraders.length);
     if(upgraders.length < 2) {
         let newName='Upgrader' + Game.time;
@@ -27,7 +29,7 @@ module.exports.loop = function() {
         Game.spawns['Spawn1'].spawnCreep([WORK, CARRY, MOVE], newName, {memory: {role: 'upgrader', upgrading: true}});
     }
 
-    let builders = _.filter(Game.creeps, (creep) => creep.memory.role == 'builder');
+    let builders = _.filter(Game.creeps, (creep) => creep.memory.role === 'builder');
     console.log('Builder Count:', builders.length);
     if(builders.length < 1) {
         let newName='Builder' + Game.time;
@@ -42,13 +44,13 @@ module.exports.loop = function() {
     
     for(let name in Game.creeps) {
         let creep = Game.creeps[name];
-        if(creep.memory.role == 'harvester') {
+        if(creep.memory.role === 'harvester') {
             roleHarvester.run(creep);
         }
-        if(creep.memory.role == 'upgrader') {
+        if(creep.memory.role === 'upgrader') {
             roleUpgrader.run(creep);
         }
-        if(creep.memory.role == 'builder') {
+        if(creep.memory.role === 'builder') {
             roleBuilder.run(creep);
         }
     }
