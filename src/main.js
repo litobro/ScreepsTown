@@ -37,7 +37,7 @@ module.exports.loop = function() {
     
     if(Game.spawns['Spawn1'].spawning) {
         let spawningCreep = Game.creeps[Game.spawns['Spawn1'].spawning.name];
-        Game.spawns['Spawn1'].visual.text('🛠️' + spawningCreep.memory.role)
+        Game.spawns['Spawn1'].visual.text(spawningCreep.memory.role)
     }
     
     for(let name in Game.creeps) {
