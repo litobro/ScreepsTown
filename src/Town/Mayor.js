@@ -173,7 +173,7 @@ function Mayor(room) {
         if(this.room.energyAvailable === this.room.energyCapacityAvailable && !this.mySpawns[0].spawning) {
             this.room.memory.buildersRequired++;
         }
-        if(this.room.energyAvailable === 0 && this.room.memory.buildersRequired > 0) {
+        if(this.room.energyAvailable < 50 && this.room.memory.buildersRequired > 0) {
             this.room.memory.buildersRequired--;
         }
         this.buildersRequired = this.room.memory.buildersRequired;
