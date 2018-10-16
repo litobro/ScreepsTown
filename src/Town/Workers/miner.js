@@ -1,5 +1,4 @@
 const Miner = {
-    body_parts: [WORK, CARRY, MOVE],
     get_body_parts: function(room) {
         /*
         if(room.energyCapacity >= 400) {

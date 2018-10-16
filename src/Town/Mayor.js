@@ -1,5 +1,6 @@
 let Miner = require('./town_workers_miner');
 let Builder = require('./town_workers_builder');
+let Hauler = require('./town_workers_hauler');
 let Powerplant = require('./town_powerplant');
 
 function Mayor(room) {
@@ -18,16 +19,33 @@ function Mayor(room) {
         //console.log('Spawns Available:', this.mySpawns.length);
 
         // Check if enough workers to run economy
-        // Should check how many free spaces around sources there are and make that many
-        // miners - then assign appropriately
         this.queueWorkerSpawn(Miner.role, this.calculateTotalMinersRequired());
+        this.queueWorkerSpawn(Hauler.role, this.calculateTotalHaulersRequired());
         this.queueWorkerSpawn(Builder.role, this.room.controller.level);
 
         if(this.spawnWorkers() === OK) {
             // Get those workers going!
             this.assignMiners();
+            this.assignHaulers();
             if (this.generateBuildQueue() === OK) {
                 this.assignBuilders();
+            }
+        }
+    };
+    
+    // Give each hauler a container to move resources to/from (2 per container)
+    this.assignHaulers = function() {
+        let containers = this.room.find(FIND_STRUCTURES, {filter: {structureType: STRUCTURE_CONTAINER}});
+        let haulers = _.filter(this.myCreeps, function(creep) { return creep.memory.role === Hauler.role; });
+
+        let currHauler = 0;
+        while (currHauler < haulers.length) {
+            for (let container in containers) {
+                if (currHauler < haulers.length) {
+                    Hauler.run(haulers[currHauler], containers[container],
+                        this.powerplant.getDepositTarget(haulers[currHauler]));
+                    currHauler++;
+                }
             }
         }
     };
@@ -46,6 +64,7 @@ function Mayor(room) {
             else if (this.buildQueue[0] === this.room.controller) {
                 Builder.upgradeController(builders[builder], this.powerplant.getWithdrawTarget(builders[builder]), this.buildQueue[0]);
             }
+            this.buildQueue.shift();
         }
     };
 
@@ -100,7 +119,8 @@ function Mayor(room) {
             let minersRequired = this._calculateMinersForSource(this.sources[source]);
             for (let i = 0; i < minersRequired; i++) {
                 if(currCreep < miners.length) {
-                    Miner.run(miners[currCreep], this.sources[source], this.powerplant.getDepositTarget(miners[currCreep]));
+                    Miner.run(miners[currCreep], this.sources[source],
+                        this.powerplant.getDepositTarget(miners[currCreep], true));
                     currCreep++;
                 }
             }
@@ -120,6 +140,11 @@ function Mayor(room) {
     this._calculateMinersForSource = function(source) {
         let fields = room.lookForAtArea(LOOK_TERRAIN, source.pos.y - 1, source.pos.x - 1, source.pos.y + 1, source.pos.x + 1, true);
         return 9 - _.countBy(fields, 'terrain').wall;
+    };
+
+    this.calculateTotalHaulersRequired = function() {
+        let containers = this.room.find(FIND_STRUCTURES, {filter: {structureType: STRUCTURE_CONTAINER}});
+        return 2 * containers.length;
     };
 
     // Spawns workers from queue
@@ -145,6 +170,9 @@ function Mayor(room) {
         }
         else if (role === Builder.role) {
             return spawn.spawnCreep(Builder.body_parts, worker_name, memory);
+        }
+        else if(role === Hauler.role) {
+            return spawn.spawnCreep(Hauler.get_body_parts(this.room), worker_name, memory);
         }
     };
 

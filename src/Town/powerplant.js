@@ -5,8 +5,19 @@ function Powerplant(room){
     this.targets = _.filter(this.room.find(FIND_STRUCTURES, {filter: {structureType: STRUCTURE_CONTAINER}})).concat(this.targets);
 
     // findClosestByPath of non full target
-    this.getDepositTarget = function(creep){
-        let targets = _.filter(this.targets, function(target){ return target.energy < target.energyCapacity || _.sum(target.store) < target.storeCapacity; });
+    this.getDepositTarget = function(creep, container){
+        container = container || false;
+        let targets = [];
+        if(container) {
+            targets = _.filter(this.targets, function (target) {
+                return target.energy < target.energyCapacity || _.sum(target.store) < target.storeCapacity;
+            });
+        }
+        else{
+            targets = _.filter(this.targets, function (target) {
+                return target.energy < target.energyCapacity;
+            });
+        }
         return creep.pos.findClosestByPath(targets);
     };
 
