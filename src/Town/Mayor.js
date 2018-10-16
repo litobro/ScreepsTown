@@ -20,17 +20,16 @@ function Mayor(room) {
         // Check if enough workers to run economy
         // Should check how many free spaces around sources there are and make that many
         // miners - then assign appropriately
-        this.queueWorkerSpawn(Miner.role, this.sources.length * 3);
+        this.queueWorkerSpawn(Miner.role, this.calculateTotalMinersRequired());
         this.queueWorkerSpawn(Builder.role, this.room.controller.level);
-        //console.log('Current Spawn Queue:', this.spawnQueue.join(", "));
-        this.spawnWorkerQueue();
 
-
-        this.generateBuildQueue();
-        //console.log('Current Build Queue:', this.buildQueue.join(', '));
-        // Get those workers going!
-        this.assignMiners();
-        this.assignBuilders();
+        if(this.spawnWorkers() === OK) {
+            // Get those workers going!
+            this.assignMiners();
+            if (this.generateBuildQueue() === OK) {
+                this.assignBuilders();
+            }
+        }
     };
 
     // Builds whatever is in the queue
@@ -51,11 +50,24 @@ function Mayor(room) {
     };
 
     // Priority is repair most damaged, build most complete, upgrade room core (unless room core is about to degrade)
+    // Check to see if will take more resources than necessary for spawn - if so wait
     this.generateBuildQueue = function() {
         //Emergency check to ensure we aren't downgraded
         if(this.room.controller.ticksToDowngrade < 500) {
             this.buildQueue.push(this.room.controller);
         }
+
+        /*
+        let spawnCost = 0;
+        for(let part in this.spawnQueue) {
+            spawnCost += BODYPART_COST[this.spawnQueue[0]];
+        }
+        console.log(spawnCost);
+        if(spawnCost > this.room.energyAvailable && spawnCost < this.room.energyCapacityAvailable) {
+            console.log('Pausing build queue to build more workers');
+            return ERR_NOT_ENOUGH_ENERGY;
+        }
+        */
 
         // First figure out if anything needs repairing
         let myStructures = this.room.find(FIND_MY_STRUCTURES);
@@ -74,22 +86,25 @@ function Mayor(room) {
 
         // Walls don't count as my structure -.-
         let walls = this.room.find(FIND_STRUCTURES, {filter: {structureType: STRUCTURE_WALL}});
-        walls = _.sortBy(walls, function(wall){ return wall.hits / wall.hitsMax});
+        walls = _.sortBy(walls, function(wall){ return wall.hits / wall.hitsMax; });
         for(let wall in walls) {
             this.buildQueue.push(walls[wall]);
         }
 
         // Nothing else to do, upgrade controller
         this.buildQueue.push(this.room.controller);
+
+        return OK;
     };
 
-    // Alternate sources for miners so they are evenly distributed
+    // Alternate sources for miners so they are distributed according to free spaces
     this.assignMiners = function() {
         let miners = _.filter(this.myCreeps, function(creep) { return creep.memory.role === Miner.role});
         let currCreep = 0;
-        while(currCreep < miners.length) {
-            for (let source in this.sources) {
-                if (currCreep < miners.length) {
+        for(let source in this.sources) {
+            let minersRequired = this._calculateMinersForSource(this.sources[source]);
+            for (let i = 0; i < minersRequired; i++) {
+                if(currCreep < miners.length) {
                     Miner.run(miners[currCreep], this.sources[source], this.powerplant.getDepositTarget(miners[currCreep]));
                     currCreep++;
                 }
@@ -97,11 +112,24 @@ function Mayor(room) {
         }
     };
 
-    this.calculateMinersRequired = function() {
-
+    // Calculate free spaces next to sources
+    this.calculateTotalMinersRequired = function() {
+        let count = 0;
+        for(let source in this.sources) {
+            count += this._calculateMinersForSource(this.sources[source]);
+        }
+        return count;
     };
 
-    this.spawnWorkerQueue = function() {
+    // Calculate free space next to source
+    this._calculateMinersForSource = function(source) {
+        let fields = room.lookForAtArea(LOOK_TERRAIN, source.pos.y - 1, source.pos.x - 1, source.pos.y + 1, source.pos.x + 1, true);
+        return 9 - _.countBy(fields, 'terrain').wall;
+    };
+
+    // Spawns workers from queue
+    // TODO: Implement multiple spawn support
+    this.spawnWorkers = function(spawn) {
         // Spawn any workers waiting in queue at spawn site
         if(this.spawnQueue.length > 0) {
             // If spawn successful, remove from queue
@@ -109,8 +137,11 @@ function Mayor(room) {
                 this.spawnQueue.shift();
             }
         }
+        return OK;
     };
 
+    // Helper for spawnWorkers
+    // Worker role to object association done here
     this._spawnWorker = function(role, spawn) {
         let worker_name = this.room.name + '_' + role.toString() + Game.time.toString();
         let memory = {memory: {role: role}};
@@ -122,6 +153,7 @@ function Mayor(room) {
         }
     };
 
+    // Queue up worker spawn for given role
     this.queueWorkerSpawn = function(role, quantity) {
         let worker_count = _.filter(this.myCreeps, function(creep) { return creep.memory.role === role}).length;
         if (worker_count < quantity) {
