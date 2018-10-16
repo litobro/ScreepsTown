@@ -120,13 +120,14 @@ function Mayor(room) {
     // Alternate sources for miners so they are distributed according to free spaces
     this.assignMiners = function() {
         let miners = _.filter(this.myCreeps, function(creep) { return creep.memory.role === Miner.role && !creep.spawning; });
+        let haulers = _.filter(this.myCreeps, function(creep) { return creep.memory.role === Hauler.role && !creep.spawning; });
         let currCreep = 0;
         for(let source in this.sources) {
             let minersRequired = this._calculateMinersForSource(this.sources[source]);
             for (let i = 0; i < minersRequired; i++) {
                 if(currCreep < miners.length) {
                     Miner.run(miners[currCreep], this.sources[source],
-                        this.powerplant.getDepositTarget(miners[currCreep], true));
+                        this.powerplant.getDepositTarget(miners[currCreep], (haulers.length > 0)));
                     currCreep++;
                 }
             }
