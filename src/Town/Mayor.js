@@ -199,7 +199,7 @@ function Mayor(room) {
         let workers = _.filter(this.myCreeps, function(creep) { return creep.memory.role === role});
         if (workers.length < quantity) {
             console.log('Not enough', role, '... Have:', workers.length, ' Want:', quantity);
-            while(_.filter(this.spawnQueue, function(name) { return name === role}).length < quantity - worker_count) {
+            while(_.filter(this.spawnQueue, function(name) { return name === role}).length < quantity - workers.length) {
                 this.spawnQueue.push(role);
             }
         }
