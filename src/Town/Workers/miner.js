@@ -1,5 +1,8 @@
 const Miner = {
     get_body_parts: function(room) {
+        if(room.energyAvailable >= 350) {
+            return [WORK, WORK, CARRY, CARRY, MOVE];
+        }
         return [WORK, CARRY, MOVE];
     },
     role: 'miner',
