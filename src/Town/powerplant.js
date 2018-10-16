@@ -27,7 +27,12 @@ function Powerplant(room){
         let targets = null;
         if(container) {
             targets = _.filter(this.targets, function (target) {
-                return target.energy / target.energyCapacity > 0.25 || target.store.energy > 0;
+                if(target instanceof StructureContainer) {
+                    return target.energy / target.energyCapacity > 0.25 || target.store.energy > 0;
+                }
+                else {
+                    return target.energy / target.energyCapacity > 0.25;
+                }
             });
         }
         else {

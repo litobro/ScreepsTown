@@ -12,6 +12,8 @@ function Mayor(room) {
     this.spawnQueue = [];
     this.buildQueue = [];
 
+    this.buildersRequired = this.room.memory.buildersRequired || 1;
+
     this.main = function() {
         console.log('Processing Room:', this.room.name);
         //console.log('Creeps Available:', this.myCreeps.length);
@@ -21,7 +23,7 @@ function Mayor(room) {
         // Check if enough workers to run economy
         this.queueWorkerSpawn(Miner.role, this.calculateTotalMinersRequired());
         this.queueWorkerSpawn(Hauler.role, this.calculateTotalHaulersRequired());
-        this.queueWorkerSpawn(Builder.role, this.room.controller.level);
+        this.queueWorkerSpawn(Builder.role, this.calculateTotalBuildersRequired());
 
         if(this.spawnWorkers() === OK) {
             // Get those workers going!
@@ -36,7 +38,7 @@ function Mayor(room) {
     // Give each hauler a container to move resources to/from (2 per container)
     this.assignHaulers = function() {
         let containers = this.room.find(FIND_STRUCTURES, {filter: {structureType: STRUCTURE_CONTAINER}});
-        let haulers = _.filter(this.myCreeps, function(creep) { return creep.memory.role === Hauler.role; });
+        let haulers = _.filter(this.myCreeps, function(creep) { return creep.memory.role === Hauler.role && !creep.spawning; });
 
         let currHauler = 0;
         while (currHauler < haulers.length) {
@@ -52,7 +54,7 @@ function Mayor(room) {
 
     // Builds whatever is in the queue
     this.assignBuilders = function() {
-        let builders = _.filter(this.myCreeps, function(creep) { return creep.memory.role === Builder.role});
+        let builders = _.filter(this.myCreeps, function(creep) { return creep.memory.role === Builder.role && !creep.spawning});
 
         for(let builder in builders) {
             let assignAll = false;
@@ -117,7 +119,7 @@ function Mayor(room) {
 
     // Alternate sources for miners so they are distributed according to free spaces
     this.assignMiners = function() {
-        let miners = _.filter(this.myCreeps, function(creep) { return creep.memory.role === Miner.role});
+        let miners = _.filter(this.myCreeps, function(creep) { return creep.memory.role === Miner.role && !creep.spawning; });
         let currCreep = 0;
         for(let source in this.sources) {
             let minersRequired = this._calculateMinersForSource(this.sources[source]);
@@ -149,6 +151,17 @@ function Mayor(room) {
     this.calculateTotalHaulersRequired = function() {
         let containers = this.room.find(FIND_STRUCTURES, {filter: {structureType: STRUCTURE_CONTAINER}});
         return 2 * containers.length;
+    };
+
+    this.calculateTotalBuildersRequired = function() {
+        if(this.room.energyAvailable === this.room.energyCapacityAvailable && !this.mySpawns[0].spawning) {
+            this.room.memory.buildersRequired++;
+        }
+        if(this.room.energyAvailable < 200) {
+            this.room.memory.buildersRequired--;
+        }
+        this.buildersRequired = this.room.memory.buildersRequired;
+        return this.buildersRequired;
     };
 
     // Spawns workers from queue
