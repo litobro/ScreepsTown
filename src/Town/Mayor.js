@@ -32,9 +32,11 @@ function Mayor(room) {
     this.assignMiners = function() {
         let miners = _.filter(this.myCreeps, function(creep) { return creep.memory.role === Miner.role});
         let currCreep = 0;
-        while(currCreep < miners.length - 1) {
+        while(currCreep < miners.length) {
             for (let source in this.sources) {
-                Miner.run(miners[currCreep++], this.sources[source], this.mySpawns[0])
+                if (currCreep < miners.length) {
+                    Miner.run(miners[currCreep++], this.sources[source], this.mySpawns[0])
+                }
             }
         }
     };
