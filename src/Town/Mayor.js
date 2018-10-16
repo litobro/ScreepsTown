@@ -55,16 +55,20 @@ function Mayor(room) {
         let builders = _.filter(this.myCreeps, function(creep) { return creep.memory.role === Builder.role});
 
         for(let builder in builders) {
+            let assignAll = false;
             if(this.buildQueue[0] instanceof Structure && this.buildQueue[0] !== this.room.controller) {
-                Builder.repair(builders[builder], this.powerplant.getWithdrawTarget(builders[builder]), this.buildQueue[0]);
+                Builder.repair(builders[builder], this.powerplant.getWithdrawTarget(builders[builder], true), this.buildQueue[0]);
             }
             else if (this.buildQueue[0] instanceof ConstructionSite) {
-                Builder.build(builders[builder], this.powerplant.getWithdrawTarget(builders[builder]), this.buildQueue[0]);
+                Builder.build(builders[builder], this.powerplant.getWithdrawTarget(builders[builder], true), this.buildQueue[0]);
+                assignAll = true;
             }
-            else if (this.buildQueue[0] === this.room.controller) {
-                Builder.upgradeController(builders[builder], this.powerplant.getWithdrawTarget(builders[builder]), this.buildQueue[0]);
+            else if (this.buildQueue[0] === this.room.controller || this.buildQueue.length < 1) {
+                Builder.upgradeController(builders[builder], this.powerplant.getWithdrawTarget(builders[builder], true), this.buildQueue[0]);
             }
-            this.buildQueue.shift();
+            if(!assignAll) {
+                this.buildQueue.shift();
+            }
         }
     };
 

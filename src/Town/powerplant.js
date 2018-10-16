@@ -7,7 +7,7 @@ function Powerplant(room){
     // findClosestByPath of non full target
     this.getDepositTarget = function(creep, container){
         container = container || false;
-        let targets = [];
+        let targets = null;
         if(container) {
             targets = _.filter(this.targets, function (target) {
                 return target.energy < target.energyCapacity || _.sum(target.store) < target.storeCapacity;
@@ -22,8 +22,19 @@ function Powerplant(room){
     };
 
     // findClosestByPath of full or partially full (70%) target
-    this.getWithdrawTarget = function(creep) {
-        let targets = _.filter(this.targets, function(target){ return target.energy / target.energyCapacity > 0.25; });
+    this.getWithdrawTarget = function(creep, container) {
+        container = container || false;
+        let targets = null;
+        if(container) {
+            targets = _.filter(this.targets, function (target) {
+                return target.energy / target.energyCapacity > 0.25 || target.store.energy > 0;
+            });
+        }
+        else {
+            targets = _.filter(this.targets, function(target) {
+                return target.energy / target.energyCapacity > 0.25;
+            });
+        }
         return creep.pos.findClosestByPath(targets);
     };
 }
