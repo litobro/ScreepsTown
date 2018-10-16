@@ -50,35 +50,30 @@ function Mayor(room) {
     };
 
     // Priority is repair most damaged, build most complete, upgrade room core (unless room core is about to degrade)
-    // Check to see if will take more resources than necessary for spawn - if so wait
     this.generateBuildQueue = function() {
         //Emergency check to ensure we aren't downgraded
         if(this.room.controller.ticksToDowngrade < 500) {
             this.buildQueue.push(this.room.controller);
         }
 
-        /*
-        let spawnCost = 0;
-        for(let part in this.spawnQueue) {
-            spawnCost += BODYPART_COST[this.spawnQueue[0]];
-        }
-        console.log(spawnCost);
-        if(spawnCost > this.room.energyAvailable && spawnCost < this.room.energyCapacityAvailable) {
-            console.log('Pausing build queue to build more workers');
-            return ERR_NOT_ENOUGH_ENERGY;
-        }
-        */
-
         // First figure out if anything needs repairing
         let myStructures = this.room.find(FIND_MY_STRUCTURES);
         myStructures = _.filter(myStructures, function(structure){ return structure.hits < structure.hitsMax; });
         myStructures = _.sortBy(myStructures, function(structure){ return structure.hits; });
+
         for(let structure in myStructures) {
             this.buildQueue.push(myStructures[structure]);
         }
 
+        // Containers don't count as my structures
+        let containers = this.room.find(FIND_STRUCTURES, {filter: {structureType: STRUCTURE_CONTAINER}});
+        containers = _.filter(containers, function(container){ return container.hits < container.hitsMax; });
+        for(let container in containers){
+            this.buildQueue.push(containers[container]);
+        }
+
         // Second build any Construction sites, order by most complete
-        let constructionSites = this.room.find(FIND_CONSTRUCTION_SITES);
+        let constructionSites = this.room.find(FIND_MY_CONSTRUCTION_SITES);
         constructionSites = _.sortBy(constructionSites, function(site) { return site.progress / site.progressTotal; }).reverse();
         for(let site in constructionSites) {
             this.buildQueue.push(constructionSites[site]);
