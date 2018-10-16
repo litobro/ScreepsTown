@@ -18,6 +18,8 @@ function Mayor(room) {
         //console.log('Spawns Available:', this.mySpawns.length);
 
         // Check if enough workers to run economy
+        // Should check how many free spaces around sources there are and make that many
+        // miners - then assign appropriately
         this.queueWorkerSpawn(Miner.role, this.sources.length * 3);
         this.queueWorkerSpawn(Builder.role, this.room.controller.level);
         //console.log('Current Spawn Queue:', this.spawnQueue.join(", "));
@@ -63,18 +65,18 @@ function Mayor(room) {
             this.buildQueue.push(myStructures[structure]);
         }
 
-        // Walls don't count as my structure -.-
-        let walls = this.room.find(FIND_STRUCTURES, {filter: {structureType: STRUCTURE_WALL}});
-        walls = _.sortBy(walls, function(wall){ return wall.hits / wall.hitsMax});
-        for(let wall in walls) {
-            this.buildQueue.push(walls[wall]);
-        }
-
         // Second build any Construction sites, order by most complete
         let constructionSites = this.room.find(FIND_CONSTRUCTION_SITES);
         constructionSites = _.sortBy(constructionSites, function(site) { return site.progress / site.progressTotal; }).reverse();
         for(let site in constructionSites) {
             this.buildQueue.push(constructionSites[site]);
+        }
+
+        // Walls don't count as my structure -.-
+        let walls = this.room.find(FIND_STRUCTURES, {filter: {structureType: STRUCTURE_WALL}});
+        walls = _.sortBy(walls, function(wall){ return wall.hits / wall.hitsMax});
+        for(let wall in walls) {
+            this.buildQueue.push(walls[wall]);
         }
 
         // Nothing else to do, upgrade controller
