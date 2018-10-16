@@ -115,7 +115,7 @@ function Mayor(room) {
         let worker_name = this.room.name + '_' + role.toString() + Game.time.toString();
         let memory = {memory: {role: role}};
         if(role === Miner.role) {
-            return spawn.spawnCreep(Miner.body_parts, worker_name, memory);
+            return spawn.spawnCreep(Miner.get_body_parts(this.room), worker_name, memory);
         }
         else if (role === Builder.role) {
             return spawn.spawnCreep(Builder.body_parts, worker_name, memory);
