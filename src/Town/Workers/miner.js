@@ -18,6 +18,6 @@ const Miner = {
             }
         }
     },
-}
+};
 
 module.exports = Miner;
