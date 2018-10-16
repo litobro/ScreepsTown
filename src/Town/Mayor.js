@@ -19,7 +19,7 @@ function Mayor(room) {
 
         // Check if enough workers to run economy
         this.queueWorkerSpawn(Miner.role, 3 * this.sources.length);
-        this.queueWorkerSpawn(Builder.role, 2);
+        this.queueWorkerSpawn(Builder.role, this.room.controller.level);
         //console.log('Current Spawn Queue:', this.spawnQueue.join(", "));
         this.spawnWorkerQueue();
 
@@ -53,14 +53,14 @@ function Mayor(room) {
         // First figure out if anything needs repairing
         let myStructures = this.room.find(FIND_MY_STRUCTURES);
         myStructures = _.filter(myStructures, function(structure){ return structure.hits < structure.hitsMax; });
-        myStructures = _.sortBy(myStructures, function(structure){ return structure.hits; }).reverse();
+        myStructures = _.sortBy(myStructures, function(structure){ return structure.hits; });
         for(let structure in myStructures) {
             this.buildQueue.push(myStructures[structure]);
         }
 
         // Second build any Construction sites, order by most complete
         let constructionSites = this.room.find(FIND_CONSTRUCTION_SITES);
-        constructionSites = _.sortBy(constructionSites, function(site) { return site.progress / site.progressTotal; });
+        constructionSites = _.sortBy(constructionSites, function(site) { return site.progress / site.progressTotal; }).reverse();
         for(let site in constructionSites) {
             this.buildQueue.push(constructionSites[site]);
         }
