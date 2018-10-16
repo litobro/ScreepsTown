@@ -11,7 +11,7 @@ function Powerplant(room){
 
     // findClosestByPath of full or partially full (70%) target
     this.getWithdrawTarget = function(creep) {
-        let targets = _.filter(this.targets, function(target){ return target.energy / target.energyCapacity > 0; })
+        let targets = _.filter(this.targets, function(target){ return target.energy / target.energyCapacity > 0.25; });
         return creep.pos.findClosestByPath(targets);
     };
 }
