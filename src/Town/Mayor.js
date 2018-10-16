@@ -97,6 +97,10 @@ function Mayor(room) {
         }
     };
 
+    this.calculateMinersRequired = function() {
+
+    };
+
     this.spawnWorkerQueue = function() {
         // Spawn any workers waiting in queue at spawn site
         if(this.spawnQueue.length > 0) {

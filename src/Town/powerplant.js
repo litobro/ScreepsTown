@@ -1,6 +1,7 @@
 function Powerplant(room){
     this.room = room;
-    this.targets = this.room.find(FIND_MY_STRUCTURES, {filter: {structureType: STRUCTURE_SPAWN || STRUCTURE_EXTENSION || STRUCTURE_CONTAINER}});
+    this.targets = this.room.find(FIND_MY_STRUCTURES);
+    this.targets = _.filter(this.targets, function(target){ return target.structureType === STRUCTURE_SPAWN || target.structureType === STRUCTURE_EXTENSION || target.structureType === STRUCTURE_CONTAINER; });
 
     // findClosestByPath of non full target
     this.getDepositTarget = function(creep){
@@ -8,9 +9,9 @@ function Powerplant(room){
         return creep.pos.findClosestByPath(targets);
     };
 
-    // findClosestByPath of full or partially full (80%) target
+    // findClosestByPath of full or partially full (70%) target
     this.getWithdrawTarget = function(creep) {
-        let targets = _.filter(this.targets, function(target){ return target.energy / target.energyCapacity >= 0.8; })
+        let targets = _.filter(this.targets, function(target){ return target.energy / target.energyCapacity >= 0.7; })
         return creep.pos.findClosestByPath(targets);
     };
 }
