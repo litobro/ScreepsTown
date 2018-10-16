@@ -111,6 +111,13 @@ function Mayor(room) {
             this.buildQueue.push(walls[wall]);
         }
 
+        // Roads don't count as my structure -.-
+        let roads = this.room.find(FIND_STRUCTURES, {filter: {structureType: STRUCTURE_ROAD}});
+        roads = _.sortBy(roads, function(road) {return road.hits / road.hitsMax; });
+        for(let road in roads) {
+            this.buildQueue.push(roads[road]);
+        }
+
         // Nothing else to do, upgrade controller
         this.buildQueue.push(this.room.controller);
 
