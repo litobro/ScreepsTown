@@ -151,7 +151,7 @@ function Mayor(room) {
 
     this.calculateTotalHaulersRequired = function() {
         let containers = this.room.find(FIND_STRUCTURES, {filter: {structureType: STRUCTURE_CONTAINER}});
-        return 2 * containers.length;
+        return 1 * containers.length;
     };
 
     this.calculateTotalBuildersRequired = function() {
