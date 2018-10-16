@@ -186,7 +186,7 @@ function Mayor(room) {
             return spawn.spawnCreep(Miner.get_body_parts(this.room), worker_name, memory);
         }
         else if (role === Builder.role) {
-            return spawn.spawnCreep(Builder.body_parts, worker_name, memory);
+            return spawn.spawnCreep(Builder.get_body_parts(this.room), worker_name, memory);
         }
         else if(role === Hauler.role) {
             return spawn.spawnCreep(Hauler.get_body_parts(this.room), worker_name, memory);

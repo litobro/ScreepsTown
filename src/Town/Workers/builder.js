@@ -1,5 +1,11 @@
 const Builder = {
     body_parts: [WORK, CARRY, MOVE],
+    get_body_parts: function(room) {
+        if (room.energyAvailable >= 400) {
+            return [WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+        }
+        return [WORK, CARRY, MOVE];
+    },
     role: 'builder',
     get_energy_or_continue: function(creep, source) {
         if(creep.carry.energy > 0) {
