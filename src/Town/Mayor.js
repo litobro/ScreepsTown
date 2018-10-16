@@ -196,12 +196,15 @@ function Mayor(room) {
 
     // Queue up worker spawn for given role
     this.queueWorkerSpawn = function(role, quantity) {
-        let worker_count = _.filter(this.myCreeps, function(creep) { return creep.memory.role === role}).length;
-        if (worker_count < quantity) {
-            console.log('Not enough', role, '... Have:', worker_count, ' Want:', quantity);
+        let workers = _.filter(this.myCreeps, function(creep) { return creep.memory.role === role});
+        if (workers.length < quantity) {
+            console.log('Not enough', role, '... Have:', workers.length, ' Want:', quantity);
             while(_.filter(this.spawnQueue, function(name) { return name === role}).length < quantity - worker_count) {
                 this.spawnQueue.push(role);
             }
+        }
+        else if (workers.length > quantity){
+            workers[0].suicide();
         }
     };
 }
