@@ -63,6 +63,13 @@ function Mayor(room) {
             this.buildQueue.push(myStructures[structure]);
         }
 
+        // Walls don't count as my structure -.-
+        let walls = this.room.find(FIND_STRUCTURES, {filter: {structureType: STRUCTURE_WALL}});
+        walls = _.sortBy(walls, function(wall){ return wall.hits / wall.hitsMax});
+        for(let wall in walls) {
+            this.buildQueue.push(walls[wall]);
+        }
+
         // Second build any Construction sites, order by most complete
         let constructionSites = this.room.find(FIND_CONSTRUCTION_SITES);
         constructionSites = _.sortBy(constructionSites, function(site) { return site.progress / site.progressTotal; }).reverse();
