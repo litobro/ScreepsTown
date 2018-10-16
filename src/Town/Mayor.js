@@ -4,12 +4,11 @@ let Powerplant = require('./town_powerplant');
 
 function Mayor(room) {
     this.room = room;
-    this.powerplant = Powerplant(this.room);
+    this.powerplant = new Powerplant(this.room);
     this.mySpawns = room.find(FIND_MY_SPAWNS);
     this.sources = room.find(FIND_SOURCES);
     this.myCreeps = room.find(FIND_MY_CREEPS);
     this.spawnQueue = [];
-    this.repairQueue = [];
     this.buildQueue = [];
 
     this.main = function() {
@@ -21,21 +20,53 @@ function Mayor(room) {
         // Check if enough workers to run economy
         this.queueWorkerSpawn(Miner.role, 3 * this.sources.length);
         this.queueWorkerSpawn(Builder.role, 2);
-        //console.log('Current Spawn Queue: ', this.spawnQueue.join(", "));
+        //console.log('Current Spawn Queue:', this.spawnQueue.join(", "));
         this.spawnWorkerQueue();
 
 
+        this.generateBuildQueue();
+        console.log('Current Build Queue:', this.buildQueue.join(', '));
         // Get those workers going!
         this.assignMiners();
         this.assignBuilders();
     };
 
-    // TODO: Implement priority manager for repairing, building, and upgrading
+    // Builds whatever is in the queue
     this.assignBuilders = function() {
         let builders = _.filter(this.myCreeps, function(creep) { return creep.memory.role === Builder.role});
+
         for(let builder in builders) {
-            Builder.upgradeController(builders[builder], this.mySpawns[0], this.room.controller);
+            if(this.buildQueue[0] instanceof Structure && this.buildQueue[0] !== this.room.controller) {
+                Builder.repair(builders[builder], this.powerplant.getWithdrawTarget(), this.buildQueue[0]);
+            }
+            else if (this.buildQueue[0] instanceof ConstructionSite) {
+                Builder.build(builders[builder], this.powerplant.getWithdrawTarget(), this.buildQueue[0]);
+            }
+            else if (this.buildQueue[0] === this.room.controller) {
+                Builder.upgradeController(builders[builder], this.powerplant.getWithdrawTarget(), this.buildQueue[0]);
+            }
         }
+    };
+
+    // Priority is repair most damaged, build most complete, upgrade room core (unless room core is about to degrade)
+    this.generateBuildQueue = function() {
+        // First figure out if anything needs repairing
+        let myStructures = this.room.find(FIND_MY_STRUCTURES);
+        myStructures = _.filter(myStructures, function(structure){ return structure.hits < structure.hitsMax; });
+        myStructures = _.sortBy(myStructures, function(structure){ return structure.hits; }).reverse();
+        for(let structure in myStructures) {
+            this.buildQueue.push(myStructures[structure]);
+        }
+
+        // Second build any Construction sites, order by most complete
+        let constructionSites = this.room.find(FIND_CONSTRUCTION_SITES);
+        constructionSites = _.sortBy(constructionSites, function(site) { return site.progress / site.progressTotal; });
+        for(let site in constructionSites) {
+            this.buildQueue.push(constructionSites[site]);
+        }
+
+        // Nothing else to do, upgrade controller
+        this.buildQueue.push(this.room.controller);
     };
 
     // Alternate sources for miners so they are evenly distributed
@@ -45,7 +76,7 @@ function Mayor(room) {
         while(currCreep < miners.length) {
             for (let source in this.sources) {
                 if (currCreep < miners.length) {
-                    Miner.run(miners[currCreep++], this.sources[source], this.mySpawns[0])
+                    Miner.run(miners[currCreep++], this.sources[source], this.powerplant.getDepositTarget())
                 }
             }
         }
