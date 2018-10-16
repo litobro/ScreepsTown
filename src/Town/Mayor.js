@@ -82,17 +82,13 @@ function Mayor(room) {
         }
 
         // First figure out if anything needs repairing
-        let myStructures = this.room.find(FIND_MY_STRUCTURES);
-        myStructures = _.filter(myStructures, function(structure){ return structure.hits < structure.hitsMax; });
-        myStructures = _.sortBy(myStructures, function(structure){ return structure.hits; });
-
+        let myStructures = this._getDamagedAndSort(false);
         for(let structure in myStructures) {
             this.buildQueue.push(myStructures[structure]);
         }
 
         // Containers don't count as my structures
-        let containers = this.room.find(FIND_STRUCTURES, {filter: {structureType: STRUCTURE_CONTAINER}});
-        containers = _.filter(containers, function(container){ return container.hits < container.hitsMax; });
+        let containers = this._getDamagedAndSort(STRUCTURE_CONTAINER);
         for(let container in containers){
             this.buildQueue.push(containers[container]);
         }
@@ -105,15 +101,13 @@ function Mayor(room) {
         }
 
         // Walls don't count as my structure -.-
-        let walls = this.room.find(FIND_STRUCTURES, {filter: {structureType: STRUCTURE_WALL}});
-        walls = _.sortBy(walls, function(wall){ return wall.hits / wall.hitsMax; });
+        let walls = this._getDamagedAndSort(STRUCTURE_WALL);
         for(let wall in walls) {
             this.buildQueue.push(walls[wall]);
         }
 
         // Roads don't count as my structure -.-
-        let roads = this.room.find(FIND_STRUCTURES, {filter: {structureType: STRUCTURE_ROAD}});
-        roads = _.sortBy(roads, function(road) {return road.hits / road.hitsMax; });
+        let roads = this._getDamagedAndSort(STRUCTURE_ROAD);
         for(let road in roads) {
             this.buildQueue.push(roads[road]);
         }
@@ -122,6 +116,20 @@ function Mayor(room) {
         this.buildQueue.push(this.room.controller);
 
         return OK;
+    };
+
+    // Helper for build queue generation
+    this._getDamagedAndSort = function(STRUCTURE_TYPE){
+        STRUCTURE_TYPE = STRUCTURE_TYPE || false;
+        let structures;
+        if(STRUCTURE_TYPE) {
+            structures = this.room.find(FIND_STRUCTURES, {filter: {structureType: STRUCTURE_TYPE}});
+        } else {
+            structures = this.room.find(FIND_MY_STRUCTURES);
+        }
+        structures = _.filter(structures, function(structure) { return structure.hits < structure.hitsMax; });
+        structures = _.sortBy(structures, function(structure) { return structure.hits / structure.hitsMax; });
+        return structures;
     };
 
     // Alternate sources for miners so they are distributed according to free spaces
