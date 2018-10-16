@@ -50,6 +50,11 @@ function Mayor(room) {
 
     // Priority is repair most damaged, build most complete, upgrade room core (unless room core is about to degrade)
     this.generateBuildQueue = function() {
+        //Emergency check to ensure we aren't downgraded
+        if(this.room.controller.ticksToDowngrade < 500) {
+            this.buildQueue.push(this.room.controller);
+        }
+
         // First figure out if anything needs repairing
         let myStructures = this.room.find(FIND_MY_STRUCTURES);
         myStructures = _.filter(myStructures, function(structure){ return structure.hits < structure.hitsMax; });
