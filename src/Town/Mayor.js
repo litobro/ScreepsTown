@@ -66,7 +66,7 @@ function Mayor(room) {
                 assignAll = true;
             }
             else if (this.buildQueue[0] === this.room.controller || this.buildQueue.length < 1) {
-                Builder.upgradeController(builders[builder], this.powerplant.getWithdrawTarget(builders[builder], true), this.buildQueue[0]);
+                Builder.upgradeController(builders[builder], this.powerplant.getWithdrawTarget(builders[builder], true), this.room.controller);
             }
             if(!assignAll) {
                 this.buildQueue.shift();
