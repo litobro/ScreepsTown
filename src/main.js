@@ -1,4 +1,3 @@
-let _ = require('lodash');
 let Traveler = require('./Traveler');
 
 let Mayor = require('./town_mayor');
