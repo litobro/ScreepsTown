@@ -18,14 +18,14 @@ function Mayor(room) {
         //console.log('Spawns Available:', this.mySpawns.length);
 
         // Check if enough workers to run economy
-        this.queueWorkerSpawn(Miner.role, 3 * this.sources.length);
+        this.queueWorkerSpawn(Miner.role, this.sources.length * 3);
         this.queueWorkerSpawn(Builder.role, this.room.controller.level);
         //console.log('Current Spawn Queue:', this.spawnQueue.join(", "));
         this.spawnWorkerQueue();
 
 
         this.generateBuildQueue();
-        console.log('Current Build Queue:', this.buildQueue.join(', '));
+        //console.log('Current Build Queue:', this.buildQueue.join(', '));
         // Get those workers going!
         this.assignMiners();
         this.assignBuilders();
@@ -37,13 +37,13 @@ function Mayor(room) {
 
         for(let builder in builders) {
             if(this.buildQueue[0] instanceof Structure && this.buildQueue[0] !== this.room.controller) {
-                Builder.repair(builders[builder], this.powerplant.getWithdrawTarget(), this.buildQueue[0]);
+                Builder.repair(builders[builder], this.powerplant.getWithdrawTarget(builders[builder]), this.buildQueue[0]);
             }
             else if (this.buildQueue[0] instanceof ConstructionSite) {
-                Builder.build(builders[builder], this.powerplant.getWithdrawTarget(), this.buildQueue[0]);
+                Builder.build(builders[builder], this.powerplant.getWithdrawTarget(builders[builder]), this.buildQueue[0]);
             }
             else if (this.buildQueue[0] === this.room.controller) {
-                Builder.upgradeController(builders[builder], this.powerplant.getWithdrawTarget(), this.buildQueue[0]);
+                Builder.upgradeController(builders[builder], this.powerplant.getWithdrawTarget(builders[builder]), this.buildQueue[0]);
             }
         }
     };
@@ -81,7 +81,8 @@ function Mayor(room) {
         while(currCreep < miners.length) {
             for (let source in this.sources) {
                 if (currCreep < miners.length) {
-                    Miner.run(miners[currCreep++], this.sources[source], this.powerplant.getDepositTarget())
+                    Miner.run(miners[currCreep], this.sources[source], this.powerplant.getDepositTarget(miners[currCreep]));
+                    currCreep++;
                 }
             }
         }
