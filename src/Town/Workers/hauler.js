@@ -1,6 +1,9 @@
 const Hauler = {
     role: 'hauler',
     get_body_parts: function(room) {
+        if (room.energyAvailable >= 300) {
+            return [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
+        }
         return [CARRY, CARRY, MOVE, MOVE];
     },
     run: function(creep, source, target) {
