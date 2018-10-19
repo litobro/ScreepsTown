@@ -1,5 +1,4 @@
 git.vs/
 .idea/
 node_modules/
-.screeps.json
 dist/

@@ -1,4 +1,4 @@
-let Traveler = require('./Traveler');
+gitlet Traveler = require('./Traveler');
 
 let Mayor = require('./town_mayor');
 
