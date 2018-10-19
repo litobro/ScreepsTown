@@ -2,6 +2,7 @@ let Miner = require('./town_workers_miner');
 let Builder = require('./town_workers_builder');
 let Hauler = require('./town_workers_hauler');
 let Powerplant = require('./town_powerplant');
+let Planning = require('./town_planning');
 
 function Mayor(room) {
     this.room = room;
