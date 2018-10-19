@@ -12,6 +12,7 @@ function Mayor(room) {
     this.myCreeps = room.find(FIND_MY_CREEPS);
     this.spawnQueue = [];
     this.buildQueue = [];
+    this.planning = new Planning(this.room, this.sources, this.mySpawns);
 
     this.buildersRequired = this.room.memory.buildersRequired || 1;
 
@@ -33,6 +34,11 @@ function Mayor(room) {
             if (this.generateBuildQueue() === OK) {
                 this.assignBuilders();
             }
+        }
+
+        // Every 500 ticks do this
+        if(Game.time % 500 === 0) {
+            this.planning.generateConstructionSites();
         }
     };
     
