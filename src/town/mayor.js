@@ -17,7 +17,7 @@ function Mayor(room) {
     this.buildersRequired = this.room.memory.buildersRequired || 1;
 
     this.main = function() {
-        console.log('Processing Room:', this.room.name);
+        console.log('Processing Room:', this.room.name, 'Game Time:', Game.time);
         //console.log('Creeps Available:', this.myCreeps.length);
         //console.log('Sources Available:', this.sources.length);
         //console.log('Spawns Available:', this.mySpawns.length);
